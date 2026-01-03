@@ -1,14 +1,15 @@
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 
-const link = new HttpLink({
-  uri: "https://sought-shad-46.hasura.app/v1/graphql",
+const httpLink = createHttpLink({
+  uri: process.env.REACT_APP_HASURA_URL,
   headers: {
-    "x-hasura-admin-secret": "wXhAdwe6ZSKqcitYfoxL05eTxapEwiBdZL5Qr1vw7WBqdQv4gGbKcQH5zh4YMTYr",
+    "x-hasura-admin-secret":
+      process.env.REACT_APP_HASURA_ADMIN_SECRET,
   },
 });
 
-const client = new ApolloClient({
-  link, // pass the HttpLink here
+export const client = new ApolloClient({
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 
