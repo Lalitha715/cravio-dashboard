@@ -72,22 +72,15 @@ export const fetchOrders = async () => {
           created_at
 
           user {
-            id
-            name
-          }
-
-          restaurant {
-            id
             name
           }
 
           order_items {
-            id
-            quantity
-            price
             dish {
-              id
-              name
+            name
+              restaurant {
+                name
+              }
             }
           }
         }
@@ -98,6 +91,8 @@ export const fetchOrders = async () => {
 
   return data.orders;
 };
+
+
 
 /* =========================
    DELIVERY BOYS
