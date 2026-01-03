@@ -146,7 +146,7 @@ export default function Dashboard() {
   
   return (
     <AdminLayout>
-      <h1 className="text-3xl font-bold mb-6">Orders</h1>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
      
 
