@@ -13,7 +13,6 @@ export const fetchUsers = async () => {
         users {
           id
           name
-          email
           phone
           role
           is_active
