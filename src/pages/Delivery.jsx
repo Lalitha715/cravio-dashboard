@@ -3,10 +3,6 @@ import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { gql, useQuery, useMutation } from "@apollo/client";
 
-// ============================
-// GraphQL Queries & Mutations
-// ============================
-
 const GET_DELIVERY_BOYS = gql`
   query GetDeliveryBoys {
     delivery_boys(order_by: { created_at: desc }) {
@@ -51,9 +47,6 @@ const DELETE_DELIVERY_BOY = gql`
   }
 `;
 
-// ============================
-// Component
-// ============================
 export default function Delivery() {
   const { data, loading, error, refetch } = useQuery(GET_DELIVERY_BOYS);
   const [addDeliveryBoy] = useMutation(ADD_DELIVERY_BOY);
@@ -64,21 +57,15 @@ export default function Delivery() {
   const [filterStatus, setFilterStatus] = useState("");
   const [deliveryBoys, setDeliveryBoys] = useState([]);
 
-  // Add Delivery Boy form state
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("active");
 
-  // ============================
-  // Filter & Search
-  // ============================
   useEffect(() => {
     if (!data?.delivery_boys) return;
 
     let filtered = [...data.delivery_boys];
-
-    // Search
     if (search) {
       filtered = filtered.filter(
         (d) =>
@@ -86,27 +73,19 @@ export default function Delivery() {
           d.phone.includes(search)
       );
     }
-
-    // Filter by status
     if (filterStatus) {
       filtered = filtered.filter((d) => d.status === filterStatus);
     }
-
     setDeliveryBoys(filtered);
   }, [data, search, filterStatus]);
 
-  // ============================
-  // Handlers
-  // ============================
   const handleAdd = async () => {
     if (!name || !phone) {
       alert("Name and Phone are required");
       return;
     }
     await addDeliveryBoy({
-      variables: {
-        object: { name, phone, status },
-      },
+      variables: { object: { name, phone, status } },
     });
     setShowAdd(false);
     setName("");
@@ -128,7 +107,10 @@ export default function Delivery() {
   };
 
   if (loading) return <p className="ml-60 mt-6">Loading delivery boys...</p>;
-  if (error) return <p className="ml-60 mt-6 text-red-500">Error loading delivery boys</p>;
+  if (error)
+    return (
+      <p className="ml-60 mt-6 text-red-500">Error loading delivery boys</p>
+    );
 
   return (
     <AdminLayout>
@@ -141,12 +123,12 @@ export default function Delivery() {
           placeholder="Search by name or phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border rounded px-3 py-2"
+          className="border px-3 py-2 rounded"
         />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="border rounded px-3 py-2"
+          className="border px-3 py-2 rounded"
         >
           <option value="">All Status</option>
           <option value="active">Active</option>
@@ -205,39 +187,31 @@ export default function Delivery() {
       )}
 
       {/* Delivery Boys Table */}
-      <div className="overflow-auto">
-        <table className="min-w-full bg-white border rounded-lg">
-          <thead className="bg-gray-100">
+      <div className="overflow-auto max-h-[70vh] bg-white shadow">
+        <table className="min-w-full bg-white">
+          <thead className="bg-gray-200">
             <tr>
-              <th className="p-3 border">Name</th>
-              <th className="p-3 border">Phone</th>
-              <th className="p-3 border">Status</th>
-              <th className="p-3 border">Created At</th>
-              <th className="p-3 border">Action</th>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Phone</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Created At</th>
+              <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
             {deliveryBoys.map((d) => (
-              <tr key={d.id} className="text-center hover:bg-gray-50">
-                <td className="p-3 border">{d.name}</td>
-                <td className="p-3 border">{d.phone}</td>
-                <td className="p-3 border capitalize">
-                  <span
-                    className={`px-2 py-1 rounded text-white text-sm ${
-                      d.status === "active" ? "bg-green-600" : "bg-gray-500"
-                    }`}
-                  >
-                    {d.status}
-                  </span>
-                </td>
-                <td className="p-3 border">
-                  {new Date(d.created_at).toLocaleString()}
-                </td>
-                <td className="p-3 border space-x-2">
+              <tr key={d.id} className="border-b hover:bg-gray-50 text-center">
+                <td className="p-3">{d.name}</td>
+                <td className="p-3">{d.phone}</td>
+                <td className="p-3 font-semibold">
+                      {d.status === "active" ? "Active" : "Inactive"}
+                  </td>
+                <td className="p-3">{new Date(d.created_at).toLocaleString()}</td>
+                <td className="p-3 space-x-2">
                   {d.status !== "active" && (
                     <button
                       onClick={() => handleStatus(d.id, "active")}
-                      className="px-3 py-1 bg-green-600 text-white rounded"
+                      className="px-3 py-1 bg-green-500 text-white rounded"
                     >
                       Activate
                     </button>
@@ -245,20 +219,28 @@ export default function Delivery() {
                   {d.status !== "inactive" && (
                     <button
                       onClick={() => handleStatus(d.id, "inactive")}
-                      className="px-3 py-1 bg-yellow-600 text-white rounded"
+                      className="px-3 py-1 bg-yellow-500 text-white rounded"
                     >
                       Deactivate
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(d.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded"
+                    className="px-3 py-1 bg-red-500 text-white rounded"
                   >
                     Delete
                   </button>
                 </td>
               </tr>
             ))}
+
+            {deliveryBoys.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-4 text-center text-gray-500">
+                  No delivery boys found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

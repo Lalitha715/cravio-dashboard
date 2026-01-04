@@ -152,7 +152,7 @@ export default function Reviews() {
           className="border rounded px-3 py-2"
         >
           <option value="">Filter by rating</option>
-          {[5,4,3,2,1].map(n => (
+          {[5, 4, 3, 2, 1].map(n => (
             <option key={n} value={n}>{n} ⭐</option>
           ))}
         </select>
@@ -182,64 +182,70 @@ export default function Reviews() {
       )}
 
       {/* Reviews Table */}
-      <div className="overflow-auto">
-        <table className="min-w-full bg-white border rounded-lg">
-          <thead className="bg-gray-100">
+      {/* Reviews Table */}
+      <div className="overflow-auto max-h-[70vh] bg-white shadow rounded-lg">
+        <table className="min-w-full bg-white rounded-lg">
+          <thead className="bg-gray-200">
             <tr>
-              <th className="p-3 border">User</th>
-              <th className="p-3 border">Restaurant</th>
-              <th className="p-3 border">Rating</th>
-              <th className="p-3 border">Comment</th>
-              <th className="p-3 border">Status</th>
-              <th className="p-3 border">Action</th>
+              <th className="p-3 text-left rounded-tl-lg">User</th>
+              <th className="p-3 text-left">Restaurant</th>
+              <th className="p-3 text-left">Rating</th>
+              <th className="p-3 text-left">Comment</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left rounded-tr-lg">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {reviews.map((r) => (
-              <tr key={r.id} className="text-center hover:bg-gray-50">
-                <td className="p-3 border">{r.user?.name || "-"}</td>
-                <td className="p-3 border">{r.restaurant?.name || "-"}</td>
-                <td className="p-3 border font-semibold">⭐ {r.rating}</td>
-                <td className="p-3 border text-left max-w-xs">{r.comment}</td>
-                <td className="p-3 border capitalize">
-                  <span
-                    className={`px-2 py-1 rounded text-white text-sm ${
-                      r.status === "visible" ? "bg-green-600" : "bg-gray-500"
-                    }`}
-                  >
-                    {r.status || "visible"}
-                  </span>
+              <tr key={r.id} className="border-b hover:bg-gray-50 align-top">
+                <td className="p-3 font-semibold">{r.user?.name || "-"}</td>
+                <td className="p-3">{r.restaurant?.name || "-"}</td>
+                <td className="p-3 font-semibold">⭐ {r.rating}</td>
+                <td className="p-3 text-gray-600 text-sm">{r.comment}</td>
+                <td className="p-3 font-medium">
+                  {r.status === "visible" ? "Visible": "Hidden"}
                 </td>
-                <td className="p-3 border space-x-2">
-                  {r.status !== "visible" && (
+                <td className="p-3 w-44">
+                  <div className="flex flex-col gap-2">
+                    {r.status !== "visible" && (
+                      <button
+                        onClick={() => handleStatus(r.id, "visible")}
+                        className="w-full py-1 rounded bg-green-500 text-white text-xs font-medium"
+                      >
+                        Show
+                      </button>
+                    )}
+                    {r.status !== "hidden" && (
+                      <button
+                        onClick={() => handleStatus(r.id, "hidden")}
+                        className="w-full py-1 rounded bg-yellow-500 text-white text-xs font-medium"
+                      >
+                        Hide
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleStatus(r.id, "visible")}
-                      className="px-3 py-1 bg-green-600 text-white rounded"
+                      onClick={() => handleDelete(r.id)}
+                      className="w-full py-1 rounded bg-red-500 text-white text-xs font-medium"
                     >
-                      Show
+                      Delete
                     </button>
-                  )}
-                  {r.status !== "hidden" && (
-                    <button
-                      onClick={() => handleStatus(r.id, "hidden")}
-                      className="px-3 py-1 bg-yellow-600 text-white rounded"
-                    >
-                      Hide
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(r.id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded"
-                  >
-                    Delete
-                  </button>
+                  </div>
                 </td>
               </tr>
             ))}
+
+            {reviews.length === 0 && (
+              <tr>
+                <td colSpan={6} className="p-4 text-center text-gray-500">
+                  No reviews found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
     </AdminLayout>
   );
 }

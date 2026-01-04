@@ -18,6 +18,10 @@ export const fetchUsers = async () => {
           is_active
           created_at
           updated_at
+          addresses{
+           address_line
+           state 
+           pincode}
         }
       }
     `,
