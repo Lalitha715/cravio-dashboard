@@ -130,7 +130,7 @@ export default function Orders() {
       </div>
 
       {/* Orders Table – Dishes Table Style */}
-      <div className="overflow-auto max-h-[70vh] bg-white shadow">
+      <div className=" bg-white shadow">
         <table className="min-w-full bg-white">
           <thead className="bg-gray-200">
             <tr>
