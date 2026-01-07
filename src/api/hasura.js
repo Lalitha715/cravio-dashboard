@@ -302,6 +302,31 @@ export const updateRestaurantStatus = async (id, status) => {
   return data.update_restaurants_by_pk;
 };
 
+/* =========================
+   UPDATE RESTAURANT (EDIT)
+========================= */
+export const updateRestaurant = async (id, restaurantData) => {
+  await client.mutate({
+    mutation: gql`
+      mutation UpdateRestaurant(
+        $id: uuid!
+        $data: restaurants_set_input!
+      ) {
+        update_restaurants_by_pk(
+          pk_columns: { id: $id }
+          _set: $data
+        ) {
+          id
+        }
+      }
+    `,
+    variables: {
+      id,
+      data: restaurantData,
+    },
+  });
+};
+
 
 /* =========================
    UPDATE ORDER STATUS

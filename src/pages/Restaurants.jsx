@@ -4,15 +4,21 @@ import {
   fetchRestaurants,
   addRestaurant,
   updateRestaurantStatus,
+  updateRestaurant,
 } from "../api/hasura";
 
 export default function Restaurants() {
+  /* =========================
+     STATES
+  ========================= */
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // add restaurant modal
+  // add / edit modal
   const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   // search & filter
   const [search, setSearch] = useState("");
@@ -50,6 +56,22 @@ export default function Restaurants() {
   };
 
   /* =========================
+     RESET FORM
+  ========================= */
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setPhone("");
+    setAddress("");
+    setImageUrl("");
+    setOpenTime("");
+    setCloseTime("");
+    setCommission("");
+    setHygieneRating(0);
+    setEditingId(null);
+  };
+
+  /* =========================
      ADD RESTAURANT
   ========================= */
   const handleAddRestaurant = async () => {
@@ -69,18 +91,46 @@ export default function Restaurants() {
     });
 
     setShowAdd(false);
+    resetForm();
     loadRestaurants();
+  };
 
-    // reset form
-    setName("");
-    setEmail("");
-    setPhone("");
-    setAddress("");
-    setImageUrl("");
-    setOpenTime("");
-    setCloseTime("");
-    setCommission("");
-    setHygieneRating(0);
+  /* =========================
+     EDIT RESTAURANT
+  ========================= */
+  const handleEditClick = (res) => {
+    setEditingId(res.id);
+    setName(res.name || "");
+    setEmail(res.email || "");
+    setPhone(res.phone || "");
+    setAddress(res.address || "");
+    setImageUrl(res.image_url || "");
+    setOpenTime(res.open_time || "");
+    setCloseTime(res.close_time || "");
+    setCommission(res.commission_percentage || "");
+    setHygieneRating(res.hygiene_rating || 0);
+
+    setShowEdit(true);
+  };
+
+  const handleUpdateRestaurant = async () => {
+    await updateRestaurant(editingId, {
+      name,
+      email,
+      phone,
+      address,
+      image_url: imageUrl,
+      open_time: openTime || null,
+      close_time: closeTime || null,
+      commission_percentage: commission
+        ? Number(commission)
+        : null,
+      hygiene_rating: Number(hygieneRating),
+    });
+
+    setShowEdit(false);
+    resetForm();
+    loadRestaurants();
   };
 
   /* =========================
@@ -117,6 +167,9 @@ export default function Restaurants() {
       </AdminLayout>
     );
 
+  /* =========================
+     UI
+  ========================= */
   return (
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-6">Restaurants</h1>
@@ -150,11 +203,11 @@ export default function Restaurants() {
         </button>
       </div>
 
-      {/* ADD RESTAURANT FORM */}
-      {showAdd && (
+      {/* ADD / EDIT FORM */}
+      {(showAdd || showEdit) && (
         <div className="bg-white border rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">
-            Add Restaurant
+            {showAdd ? "Add Restaurant" : "Edit Restaurant"}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -171,13 +224,17 @@ export default function Restaurants() {
 
           <div className="flex gap-3 mt-6">
             <button
-              onClick={handleAddRestaurant}
+              onClick={showAdd ? handleAddRestaurant : handleUpdateRestaurant}
               className="bg-blue-600 text-white px-5 py-2 rounded"
             >
-              Save
+              {showAdd ? "Save" : "Update"}
             </button>
             <button
-              onClick={() => setShowAdd(false)}
+              onClick={() => {
+                setShowAdd(false);
+                setShowEdit(false);
+                resetForm();
+              }}
               className="bg-gray-400 text-white px-5 py-2 rounded"
             >
               Cancel
@@ -187,7 +244,7 @@ export default function Restaurants() {
       )}
 
       {/* TABLE */}
-      <div className="overflow-auto max-h-[70vh]">
+      <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow rounded-lg">
           <thead className="bg-gray-200">
             <tr>
@@ -210,46 +267,33 @@ export default function Restaurants() {
                     className="w-14 h-14 rounded object-cover"
                   />
                 </td>
-                <td className="py-3 px-4 font-semibold">
-                  {res.name}
-                </td>
+                <td className="py-3 px-4 font-semibold">{res.name}</td>
                 <td className="py-3 px-4">{res.phone}</td>
-                <td className="py-3 px-4">
-                  ⭐ {res.hygiene_rating}
-                </td>
-                <td className="py-3 px-4 capitalize">
-                  {res.status}
-                </td>
+                <td className="py-3 px-4">⭐ {res.hygiene_rating}</td>
+                <td className="py-3 px-4 capitalize">{res.status}</td>
                 <td className="py-3 px-4 flex gap-2">
+                  <button
+                    onClick={() => handleEditClick(res)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+
                   {res.status === "pending" && (
                     <>
                       <button
-                        onClick={() =>
-                          handleStatusChange(res.id, "approved")
-                        }
+                        onClick={() => handleStatusChange(res.id, "approved")}
                         className="bg-green-600 text-white px-3 py-1 rounded"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() =>
-                          handleStatusChange(res.id, "rejected")
-                        }
+                        onClick={() => handleStatusChange(res.id, "rejected")}
                         className="bg-red-600 text-white px-3 py-1 rounded"
                       >
                         Reject
                       </button>
                     </>
-                  )}
-                  {res.status === "approved" && (
-                    <span className="text-green-600 font-semibold">
-                      Approved
-                    </span>
-                  )}
-                  {res.status === "rejected" && (
-                    <span className="text-red-600 font-semibold">
-                      Rejected
-                    </span>
                   )}
                 </td>
               </tr>
