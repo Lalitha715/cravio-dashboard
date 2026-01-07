@@ -159,7 +159,7 @@ export default function Restaurants() {
     return matchSearch && matchStatus;
   });
 
-  if (loading) return <AdminLayout>Loading...</AdminLayout>;
+  if (loading) return <AdminLayout>Loading Restaurants...</AdminLayout>;
   if (error)
     return (
       <AdminLayout>

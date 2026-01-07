@@ -122,9 +122,11 @@ export default function Dashboard() {
   return (
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      {loading ? (
-        <p>Loading dashboard...</p>
-      ) : (
+      {loading && (
+        <div className="mt-6 text-gray-500">Loading dashboard...</div>
+      )}
+
+      {!loading && (
         <>
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">

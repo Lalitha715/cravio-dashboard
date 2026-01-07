@@ -72,16 +72,23 @@ export const fetchOrders = async () => {
           order_number
           total_amount
           status
+          payment_method
           created_at
 
           user {
+            id
             name
           }
 
           order_items {
+            id 
+            quantity
+            price
             dish {
+            id
             name
               restaurant {
+                id
                 name
               }
             }
@@ -92,7 +99,7 @@ export const fetchOrders = async () => {
     fetchPolicy: "no-cache",
   });
 
-  return data.orders;
+  return data.orders || [];
 };
 
 

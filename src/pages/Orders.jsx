@@ -5,6 +5,7 @@ import { fetchOrders, updateOrderStatus } from "../api/hasura";
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -33,6 +34,7 @@ export default function Orders() {
       );
     } catch (err) {
       console.error("Failed to update status:", err);
+      setError(true);
     }
   };
 
@@ -67,8 +69,7 @@ export default function Orders() {
     0
   );
 
-  if (loading) return <p className="ml-60 mt-6">Loading orders...</p>;
-
+  
   const highlightText = (text, term) => {
     if (!term) return text;
     const regex = new RegExp(`(${term})`, "gi");
@@ -83,10 +84,18 @@ export default function Orders() {
       )
     );
   };
+  if (loading) return <AdminLayout>Loading Orders...</AdminLayout>;
+    if (error)
+      return (
+        <AdminLayout>
+          <p className="text-red-500">Failed to load orders</p>
+        </AdminLayout>
+      );
 
   return (
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-4">Orders</h1>
+     
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4 items-center">
@@ -200,6 +209,7 @@ export default function Orders() {
           </tbody>
         </table>
       </div>
+      
     </AdminLayout>
   );
 }

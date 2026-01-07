@@ -76,8 +76,14 @@ export default function Users() {
     setFilteredUsers(filtered);
   }, [users, searchText, filterRole, filterActive]);
 
-  if (loading) return <p className="ml-64 mt-6">Loading users...</p>;
-  if (error) return <p className="ml-64 mt-6 text-red-500">Failed to load users</p>;
+  if (loading) return <AdminLayout>Loading Users...</AdminLayout>;
+
+  if (error)
+    return (
+      <AdminLayout>
+        <p className="text-red-500">Failed to load users</p>
+      </AdminLayout>
+    );
 
   return (
     <AdminLayout>

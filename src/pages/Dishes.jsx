@@ -8,6 +8,7 @@ export default function Dishes() {
   const [selectedRestaurant, setSelectedRestaurant] = useState("all");
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState(null);
 
   // Form state for adding a dish
   const [name, setName] = useState("");
@@ -33,8 +34,8 @@ export default function Dishes() {
       setRestaurants(restaurantData);
       setLoading(false);
     } catch (err) {
-      console.error(err);
-      setLoading(false);
+      console.error("Failed to load dishes or restaurants:", err);
+      setError(true);
     }
   };
 
@@ -85,10 +86,18 @@ export default function Dishes() {
     selectedRestaurant === "all"
       ? dishes
       : dishes.filter(
-          (d) => d.restaurant?.id === selectedRestaurant
-        );
+        (d) => d.restaurant?.id === selectedRestaurant
+      );
 
-  if (loading) return <p className="ml-60 mt-6">Loading dishes...</p>;
+  if (loading) return <AdminLayout>Loading Dishes...</AdminLayout>;
+
+  if (error)
+    return (
+      <AdminLayout>
+        <p className="text-red-500">Failed to load dishes</p>
+      </AdminLayout>
+    );
+
 
   return (
     <AdminLayout>
