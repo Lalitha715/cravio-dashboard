@@ -44,6 +44,8 @@ export const fetchRestaurants = async () => {
           email
           phone
           address
+          latitude
+          longitude
           status
           commission_percentage
           open_time
@@ -90,6 +92,9 @@ export const fetchOrders = async () => {
               restaurant {
                 id
                 name
+                location
+                latitude
+                longitude
               }
             }
           }

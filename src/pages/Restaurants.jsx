@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
+import mapboxgl from "mapbox-gl";
 import {
   fetchRestaurants,
   addRestaurant,
@@ -31,6 +32,9 @@ export default function Restaurants() {
   const [address, setAddress] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [openTime, setOpenTime] = useState("");
+  const [latitude,setLatitude] = useState("");
+  const [longitude,setLongitude] = useState("");
+  const [loadingLoc,setLoadingLoc] = useState(false);
   const [closeTime, setCloseTime] = useState("");
   const [commission, setCommission] = useState("");
   const [hygieneRating, setHygieneRating] = useState(0);
@@ -63,6 +67,8 @@ export default function Restaurants() {
     setEmail("");
     setPhone("");
     setAddress("");
+    setLatitude("");
+    setLongitude("");
     setImageUrl("");
     setOpenTime("");
     setCloseTime("");
@@ -70,6 +76,39 @@ export default function Restaurants() {
     setHygieneRating(0);
     setEditingId(null);
   };
+
+  const getLocationFromAddress = async () => {
+  try {
+    setLoadingLoc(true);
+
+    const token = process.env.REACT_APP_MAPBOX_TOKEN;
+
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+        address
+      )}.json?access_token=${token}`
+    );
+
+    const data = await res.json();
+
+    if (data.features.length === 0) {
+      alert("Location not found");
+      return;
+    }
+
+    const [lng, lat] = data.features[0].center;
+
+    setLatitude(lat);
+    setLongitude(lng);
+
+  } catch (err) {
+    console.log(err);
+    alert("Failed to get location");
+  } finally {
+    setLoadingLoc(false);
+  }
+};
+
 
   /* =========================
      ADD RESTAURANT
@@ -80,6 +119,8 @@ export default function Restaurants() {
       email,
       phone,
       address,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
       image_url: imageUrl,
       open_time: openTime || null,
       close_time: closeTime || null,
@@ -104,6 +145,8 @@ export default function Restaurants() {
     setEmail(res.email || "");
     setPhone(res.phone || "");
     setAddress(res.address || "");
+    setLatitude(res.latitude || "");
+    setLongitude(res.longitude || "");
     setImageUrl(res.image_url || "");
     setOpenTime(res.open_time || "");
     setCloseTime(res.close_time || "");
@@ -119,6 +162,8 @@ export default function Restaurants() {
       email,
       phone,
       address,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
       image_url: imageUrl,
       open_time: openTime || null,
       close_time: closeTime || null,
@@ -215,6 +260,11 @@ export default function Restaurants() {
             <input className="border px-3 py-2 rounded" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <input className="border px-3 py-2 rounded" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
             <input className="border px-3 py-2 rounded" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input className="border px-3 py-2 rounded" placeholder="Latitude" value={latitude} onChange={(e) => setLatitude(e.target.value)} />
+            <input className="border px-3 py-2 rounded" placeholder="Longitude" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+            <button onClick={getLocationFromAddress} disabled={loadingLoc} className="bg-blue-500 text-white px-3 py-2 rounded">
+              {loadingLoc ? "Locating..." : "Get Lat/Lng"}
+            </button>
             <input className="border px-3 py-2 rounded" placeholder="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
             <input type="time" className="border px-3 py-2 rounded" value={openTime} onChange={(e) => setOpenTime(e.target.value)} />
             <input type="time" className="border px-3 py-2 rounded" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} />
