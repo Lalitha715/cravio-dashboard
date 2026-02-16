@@ -92,7 +92,7 @@ export const fetchOrders = async () => {
               restaurant {
                 id
                 name
-                location
+                address
                 latitude
                 longitude
               }
