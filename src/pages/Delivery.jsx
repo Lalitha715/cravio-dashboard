@@ -9,7 +9,7 @@ const GET_DELIVERY_BOYS = gql`
       id
       name
       phone
-      status
+      is_active
       created_at
     }
   }
@@ -24,13 +24,13 @@ const ADD_DELIVERY_BOY = gql`
 `;
 
 const UPDATE_DELIVERY_STATUS = gql`
-  mutation UpdateDeliveryStatus($id: uuid!, $status: String!) {
+  mutation UpdateDeliveryStatus($id: uuid!, $is_active: Boolean!) {
     update_delivery_boys_by_pk(
       pk_columns: { id: $id }
-      _set: { status: $status }
+      _set: { is_active: $is_active }
     ) {
       id
-      status
+      is_active
     }
   }
 `;
@@ -57,7 +57,6 @@ export default function Delivery() {
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState("active");
 
   useEffect(() => {
     if (!data?.delivery_boys) return;
@@ -72,8 +71,12 @@ export default function Delivery() {
       );
     }
 
-    if (filterStatus) {
-      filtered = filtered.filter((d) => d.status === filterStatus);
+    if (filterStatus === "active") {
+      filtered = filtered.filter((d) => d.is_active === true);
+    }
+
+    if (filterStatus === "inactive") {
+      filtered = filtered.filter((d) => d.is_active === false);
     }
 
     setDeliveryBoys(filtered);
@@ -86,18 +89,29 @@ export default function Delivery() {
     }
 
     await addDeliveryBoy({
-      variables: { object: { name, phone, status } },
+      variables: {
+        object: {
+          name,
+          phone,
+          is_active: true,
+        },
+      },
     });
 
     setShowAdd(false);
     setName("");
     setPhone("");
-    setStatus("active");
     refetch();
   };
 
   const handleStatus = async (id, newStatus) => {
-    await updateStatus({ variables: { id, status: newStatus } });
+    await updateStatus({
+      variables: {
+        id,
+        is_active: newStatus,
+      },
+    });
+
     refetch();
   };
 
@@ -112,14 +126,12 @@ export default function Delivery() {
     <AdminLayout>
       <h1 className="text-2xl font-bold mb-6">Delivery Boys</h1>
 
-      {loading && <p className="text-gray-500">Loading delivery boys...</p>}
-      {error && (
-        <p className="text-red-500 mb-4">Error loading delivery boys</p>
-      )}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">Error loading delivery boys</p>}
 
       {!loading && !error && (
         <>
-          {/* Search & Filter */}
+          {/* Search + Filter */}
           <div className="flex flex-wrap gap-4 mb-4 items-center">
             <input
               type="text"
@@ -128,19 +140,20 @@ export default function Delivery() {
               onChange={(e) => setSearch(e.target.value)}
               className="border px-3 py-2 rounded"
             />
+
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="border px-3 py-2 rounded"
             >
-              <option value="">All Status</option>
+              <option value="">All</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
 
             <button
               onClick={() => setShowAdd(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+              className="bg-green-600 text-white px-4 py-2 rounded"
             >
               Add Delivery Boy
             </button>
@@ -148,30 +161,27 @@ export default function Delivery() {
 
           {/* Add Form */}
           {showAdd && (
-            <div className="bg-white border rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-lg font-semibold mb-4">Add Delivery Boy</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border p-6 mb-6 rounded shadow">
+              <h2 className="text-lg font-semibold mb-4">
+                Add Delivery Boy
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-4">
                 <input
-                  className="border rounded px-3 py-2"
+                  className="border px-3 py-2 rounded"
                   placeholder="Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
+
                 <input
-                  className="border rounded px-3 py-2"
+                  className="border px-3 py-2 rounded"
                   placeholder="Phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
-                <select
-                  className="border rounded px-3 py-2"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
               </div>
+
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={handleAdd}
@@ -190,8 +200,8 @@ export default function Delivery() {
           )}
 
           {/* Table */}
-          <div className="overflow-auto max-h-[70vh] bg-white shadow">
-            <table className="min-w-full bg-white">
+          <div className="overflow-auto bg-white shadow rounded">
+            <table className="min-w-full">
               <thead className="bg-gray-200">
                 <tr>
                   <th className="p-3 text-left">Name</th>
@@ -201,34 +211,37 @@ export default function Delivery() {
                   <th className="p-3 text-left">Action</th>
                 </tr>
               </thead>
+
               <tbody>
                 {deliveryBoys.map((d) => (
-                  <tr key={d.id} className="border-b hover:bg-gray-50">
+                  <tr key={d.id} className="border-b">
                     <td className="p-3">{d.name}</td>
                     <td className="p-3">{d.phone}</td>
                     <td className="p-3 font-semibold">
-                      {d.status === "active" ? "Active" : "Inactive"}
+                      {d.is_active ? "Active" : "Inactive"}
                     </td>
                     <td className="p-3">
                       {new Date(d.created_at).toLocaleString()}
                     </td>
                     <td className="p-3 space-x-2">
-                      {d.status !== "active" && (
+                      {!d.is_active && (
                         <button
-                          onClick={() => handleStatus(d.id, "active")}
+                          onClick={() => handleStatus(d.id, true)}
                           className="px-3 py-1 bg-green-500 text-white rounded"
                         >
                           Activate
                         </button>
                       )}
-                      {d.status !== "inactive" && (
+
+                      {d.is_active && (
                         <button
-                          onClick={() => handleStatus(d.id, "inactive")}
+                          onClick={() => handleStatus(d.id, false)}
                           className="px-3 py-1 bg-yellow-500 text-white rounded"
                         >
                           Deactivate
                         </button>
                       )}
+
                       <button
                         onClick={() => handleDelete(d.id)}
                         className="px-3 py-1 bg-red-500 text-white rounded"

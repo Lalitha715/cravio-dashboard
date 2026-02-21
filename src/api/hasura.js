@@ -120,7 +120,6 @@ export const fetchDeliveryBoys = async () => {
           id
           name
           phone
-          status
         }
       }
     `,
